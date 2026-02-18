@@ -1,208 +1,276 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>خياط اليرموك | المتجر المتكامل</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;700&family=Amiri:wght@700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
-    <style>
-        :root {
-            --gold: #d4af37;
-            --dark-gold: #aa8c2c;
-            --black: #0a0a0a;
-            --gray: #1a1a1a;
-            --white: #ffffff;
-            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+<!-- Firebase Libraries -->
+<script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-storage-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-firestore-compat.js"></script>
+<script>
+  // إعدادات مشروعك - غيّرها ببيانات مشروعك من Firebase
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_APP.firebaseapp.com",
+    projectId: "YOUR_APP",
+    storageBucket: "YOUR_APP.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; }
-        body { background-color: var(--black); color: var(--white); overflow-x: hidden; }
+  firebase.initializeApp(firebaseConfig);
+  const storage = firebase.storage();
+  const dbFB = firebase.firestore();
+</script>
+<script>
+let db = { fabrics: [], ready: [] };
+let tempImg = "", receiptImg = "";
+let readyCartTotal = 0;
+let adminMode = false;
 
-        /* الأنميشن والانتقالات */
-        .page-fade { animation: fadeIn 0.6s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+// -- بوت ياقوت ودوال واجهة المستخدم كما السابق --
 
-        /* الهيدر */
-        header {
-            position: sticky; top: 0; z-index: 1000;
-            background: rgba(10, 10, 10, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 15px 5%;
-            display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
-        }
+function toggleYaqoot() { const chat = document.getElementById('yaqoot_chat'); chat.style.display = chat.style.display === 'block' ? 'none' : 'block'; }
+function yaqootReply(type) {
+    const text = document.getElementById('chat_text');
+    if(type === 'policy') text.innerHTML = "<b>🛡️ ضمان اليرموك:</b> نضمن لك المقاس 100%. إذا وجد أي اختلاف، التعديل أو الاستبدال مجاني.";
+    else if(type === 'offer') text.innerHTML = "<b>🎁 عرض الكاش:</b> عند دفع كامل المبلغ مقدماً، تحصل على (تطريز يدوي مجاني للرقبة) أو (علبة كبكات).";
+    else if(type === 'about') text.innerHTML = "<b>📜 قصة اليرموك:</b> بدأت رحلتنا في 2002 على يد الوالد المؤسس.";
+}
 
-        .logo { color: var(--gold); font-family: 'Amiri', serif; font-size: 1.5rem; display: flex; align-items: center; gap: 10px; }
+// -- الإدارة --
+function openAdmin() {
+    if(prompt("كلمة مرور الإدارة:") === "1234") {
+        adminMode = true;
+        document.getElementById('adminPanel').style.display='flex';
+        filterReady('all');
+    }
+}
+function closeAdmin() {
+    adminMode = false;
+    document.getElementById('adminPanel').style.display='none';
+    filterReady('all');
+}
 
-        /* الأقسام (مخفية افتراضياً للتنقل) */
-        .section { display: none; padding: 40px 5%; min-height: 90vh; }
-        .section.active { display: block; }
+// رفع صورة إلى Firebase وتخزين الرابط
+function encodeImg(input) {
+    if (!input.files || !input.files[0]) return;
+    const file = input.files[0];
+    const storageRef = storage.ref('products/' + Date.now() + '_' + file.name);
+    const uploadTask = storageRef.put(file);
 
-        /* البطاقات (Card Styles) */
-        .card {
-            background: var(--gray);
-            border: 1px solid rgba(212, 175, 55, 0.1);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            transition: var(--transition);
-        }
-        .card:hover { border-color: var(--gold); transform: translateY(-5px); }
+    uploadTask.on('state_changed', 
+      null,
+      (error) => { alert('خطأ في رفع الصورة'); }, 
+      () => {
+        uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+          tempImg = downloadURL;
+          alert("تم رفع الصورة بنجاح.");
+        });
+      }
+    );
+}
+function encodeReceipt(input) {
+    if (!input.files || !input.files[0]) return;
+    const file = input.files[0];
+    const reader = new FileReader();
+    reader.onload = (e) => receiptImg = e.target.result;
+    reader.readAsDataURL(file);
+}
 
-        /* الأزرار */
-        .btn {
-            padding: 12px 25px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-            transition: var(--transition);
-            display: inline-flex; align-items: center; gap: 8px;
-            text-decoration: none;
-        }
-        .btn-gold { background: var(--gold); color: var(--black); }
-        .btn-gold:hover { background: var(--dark-gold); box-shadow: 0 0 15px rgba(212, 175, 55, 0.4); }
-        .btn-outline { background: transparent; border: 1px solid var(--gold); color: var(--gold); }
+function saveProduct() {
+    const cat = document.getElementById('adm_cat').value;
+    const title = document.getElementById('adm_title').value;
+    const newP = document.getElementById('adm_new').value;
 
-        /* نافذة الإغلاق (Modal) */
-        .modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: none; justify-content: center; align-items: center; z-index: 2000;
-        }
-        .modal-content {
-            background: var(--gray); padding: 30px; border-radius: 15px;
-            width: 90%; max-width: 500px; position: relative;
-            border: 1px solid var(--gold);
-        }
-        .close-btn { position: absolute; top: 15px; left: 15px; cursor: pointer; color: var(--gold); }
+    if(cat === "logo") {
+        document.getElementById('store_logo').src = tempImg;
+        closeAdmin();
+        alert("تم تغيير الشعار؛");
+    } else if(!tempImg || !title || !newP) {
+        alert("الرجاء تعبئة جميع الحقول واختيار صورة.");
+    } else {
+        const docCat = (cat === "fabric") ? "fabrics" : "ready";
+        const item = { cat, title, newPrice: newP, img: tempImg };
+        dbFB.collection(docCat).add(item).then(() => {
+            alert("تمت إضافة المنتج بنجاح");
+            loadProducts(); // تحديث القائمة بعد الإضافة
+            closeAdmin();
+        });
+    }
+}
 
-        /* متجر الملابس الجاهزة */
-        .products-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
-        .product-img { width: 100%; height: 200px; background: #333; border-radius: 8px; margin-bottom: 15px; }
+function deleteProduct(id, cat) {
+    if (!confirm("هل أنت متأكد من حذف المنتج؟")) return;
+    dbFB.collection(cat).doc(id).delete()
+        .then(() => {
+            alert("تم حذف المنتج.");
+            loadProducts();
+        })
+        .catch(() => alert("حدث خطأ أثناء الحذف."));
+}
 
-        /* المدخلات */
-        input, select {
-            width: 100%; padding: 12px; margin: 10px 0;
-            background: #222; border: 1px solid #444; color: white; border-radius: 6px;
-        }
-    </style>
-</head>
-<body>
+// -- جلب المنتجات من فاييربيز --
+function loadProducts() {
+    db.fabrics = [];
+    db.ready = [];
+    // جلب الأقمشة
+    dbFB.collection('fabrics').get().then((qs) => {
+        db.fabrics = [];
+        qs.forEach((doc) => {
+            let p = doc.data();
+            p.id = doc.id;
+            db.fabrics.push(p);
+        });
+    });
+    // جلب المنتجات الجاهزة
+    dbFB.collection('ready').get().then((qs) => {
+        db.ready = [];
+        qs.forEach((doc) => {
+            let p = doc.data();
+            p.id = doc.id;
+            db.ready.push(p);
+        });
+        filterReady('all');
+    });
+}
 
-    <header>
-        <div class="logo"><i data-lucide="scissors"></i> اليرموك</div>
-        <nav>
-            <button class="btn btn-outline" onclick="showSection('home')">الرئيسية</button>
-            <button class="btn btn-gold" onclick="openModal('cartModal')"><i data-lucide="shopping-cart"></i> السلة</button>
-        </nav>
-    </header>
+// عند تحميل الصفحة
+window.onload = function() {
+    loadProducts();
+}
 
-    <section id="home" class="section active page-fade">
-        <div style="text-align: center; padding: 60px 0;">
-            <h1 style="font-size: 3rem; margin-bottom: 15px;">خياطة <span style="color: var(--gold);">فاخرة</span></h1>
-            <p style="color: #888; margin-bottom: 30px;">نصمم أناقتك منذ عام 2002 بأجود الأقمشة العالمية.</p>
-            <div style="display: flex; justify-content: center; gap: 15px;">
-                <button class="btn btn-gold" onclick="showSection('shop')">تسوق الملابس الجاهزة</button>
-                <button class="btn btn-outline" onclick="showSection('tailor')">صمّم ثوبك الخاص</button>
-            </div>
+// -- فتح مودال اختيار القماش --
+function openFabricModal() {
+    const list = document.getElementById('modal_fabric_list');
+    list.innerHTML = db.fabrics.length ? db.fabrics.map(f => `
+        <div style="border:1px solid #eee; padding:8px; text-align:center; cursor:pointer; border-radius:12px; transition:0.3s;" onclick="confirmFabricSelection('${f.title}', ${f.newPrice}, '${f.img}')">
+            <img src="${f.img}" style="width:100%; height:80px; object-fit:cover; border-radius:8px;">
+            <div style="font-size:11px; font-weight:bold; margin-top:5px;">${f.title}</div>
+            <div style="font-size:11px; color:green;">${f.newPrice} ريال</div>
         </div>
-    </section>
+    `).join('') : '<p style="grid-column:1/-1; text-align:center;">يرجى إضافة أقمشة من لوحة الإدارة أولاً</p>';
+    document.getElementById('fabricModal').style.display = 'flex';
+}
 
-    <section id="shop" class="section page-fade">
-        <h2 style="margin-bottom: 25px; color: var(--gold);">المعرض الجاهز</h2>
-        <div class="products-grid">
-            <div class="card">
-                <div class="product-img"></div>
-                <h3>ثوب شتوي فاخر</h3>
-                <p style="color: var(--gold); font-weight: bold; margin: 10px 0;">450 ر.س</p>
-                <button class="btn btn-gold" style="width: 100%;" onclick="addToCart('ثوب شتوي', 450)">أضف للسلة</button>
-            </div>
-            <div class="card">
-                <div class="product-img"></div>
-                <h3>ثوب أبيض قطن</h3>
-                <p style="color: var(--gold); font-weight: bold; margin: 10px 0;">380 ر.س</p>
-                <button class="btn btn-gold" style="width: 100%;" onclick="addToCart('ثوب أبيض', 380)">أضف للسلة</button>
-            </div>
+function confirmFabricSelection(name, price, img) {
+    const id = Date.now();
+    const card = document.createElement('div');
+    card.className = 'selected-thobe-card';
+    card.id = `thobe_${id}`;
+    card.innerHTML = `
+        <button type="button" class="remove-card" onclick="removeThobe(${id})">×</button>
+        <div style="display:flex; gap:12px; align-items:center;">
+            <img src="${img}" style="width:50px; height:50px; border-radius:8px; object-fit:cover; border:1px solid var(--gold);">
+            <div><b>ثوب: ${name}</b><br><span style="color:green; font-size:13px;">${price} ريال يمني</span></div>
         </div>
-    </section>
-
-    <section id="tailor" class="section page-fade">
-        <div class="card" style="max-width: 600px; margin: 0 auto;">
-            <h2 style="color: var(--gold); text-align: center;">تفصيل ثوب حسب الطلب</h2>
-            <div id="step1">
-                <input type="text" placeholder="اسم العميل" id="custName">
-                <select id="fabric">
-                    <option>اختر القماش</option>
-                    <option>قطن ياباني</option>
-                    <option>سلك فاخر</option>
-                </select>
-                <button class="btn btn-gold" style="width: 100%; margin-top: 15px;" onclick="nextStep()">التالي: المقاسات</button>
-            </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:15px;">
+            <select class="thobe-opt"><option>قلاب ملكي</option><option>قلاب فرنسي</option><option>صيني</option><option>سادة مربع</option></select>
+            <select class="thobe-opt"><option>كبك قماش</option><option>كبك حشو</option><option>سادة</option></select>
+            <select class="thobe-opt"><option>كبس ظاهر</option><option>زرار مخفي</option><option>سحاب VIP</option></select>
+            <select class="thobe-opt"><option>قصة قطرية</option><option>قصة سعودية</option><option>قصة كويتية</option></select>
         </div>
-    </section>
+        <input type="hidden" class="item-price" value="${price}">
+    `;
+    document.getElementById('tailor_list').appendChild(card);
+    calcGrandTotal();
+    document.getElementById('fabricModal').style.display = 'none';
+}
 
-    <div id="cartModal" class="modal">
-        <div class="modal-content page-fade">
-            <span class="close-btn" onclick="closeModal('cartModal')"><i data-lucide="x"></i></span>
-            <h2 style="color: var(--gold); margin-bottom: 20px;">سلة المشتريات</h2>
-            <div id="cartItems">السلة فارغة حالياً</div>
-            <hr style="margin: 20px 0; border: 0.5px solid #333;">
-            <button class="btn btn-gold" style="width: 100%;" onclick="checkout()">تأكيد الطلب عبر واتساب</button>
-        </div>
-    </div>
+function removeThobe(id) { document.getElementById(`thobe_${id}`).remove(); calcGrandTotal(); }
 
-    <script>
-        // تفعيل الأيقونات
-        lucide.createIcons();
+// -- إضافة للسلة --
+function addReadyToCart(price) {
+    readyCartTotal += parseInt(price);
+    calcGrandTotal();
+    alert("تمت إضافة المنتج إلى قائمة هيبتك");
+}
 
-        // دالة التنقل بين الأقسام
-        function showSection(sectionId) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.getElementById(sectionId).classList.add('active');
-            window.scrollTo(0,0);
-        }
+// -- المفضلة --
+function addToFavorite(id) {
+    let favorites = JSON.parse(localStorage.getItem('ymk_favorites') || "[]");
+    if (!favorites.includes(id)) {
+        favorites.push(id);
+        localStorage.setItem('ymk_favorites', JSON.stringify(favorites));
+        alert("تمت إضافة المنتج إلى المفضلة.");
+        filterReady('all');
+    } else {
+        alert("المنتج موجود بالفعل في المفضلة.");
+    }
+}
 
-        // دوال النافذة (فتح وإغلاق)
-        function openModal(id) {
-            document.getElementById(id).style.display = 'flex';
-        }
+function showFavorites() {
+    let favorites = JSON.parse(localStorage.getItem('ymk_favorites') || "[]");
+    const favItems = db.ready.filter(i => favorites.includes(i.id));
+    displayReadyProducts(favItems);
+}
 
-        function closeModal(id) {
-            document.getElementById(id).style.display = 'none';
-        }
+function filterReady(type, btn) {
+    if(btn) {
+        document.querySelectorAll('.ready-type-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    }
+    const items = type === 'all' ? db.ready : db.ready.filter(i => i.cat === type);
+    displayReadyProducts(items);
+}
 
-        // نظام السلة البسيط
-        let cart = [];
-        function addToCart(name, price) {
-            cart.push({name, price});
-            updateCartUI();
-            alert('تمت الإضافة للسلة');
-        }
-
-        function updateCartUI() {
-            const container = document.getElementById('cartItems');
-            if(cart.length === 0) {
-                container.innerHTML = "السلة فارغة";
-                return;
-            }
-            container.innerHTML = cart.map(item => `
-                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                    <span>${item.name}</span>
-                    <span style="color:var(--gold)">${item.price} ر.س</span>
+// -- عرض المنتجات الجاهزة مع أيقونات حذف/سلة/قلب مفضلة --
+function displayReadyProducts(items) {
+    const display = document.getElementById('ready_display');
+    let favorites = JSON.parse(localStorage.getItem('ymk_favorites') || "[]");
+    display.innerHTML =
+        items.length ?
+            items.map(i => `
+                <div class="product-card">
+                    <img src="${i.img}">
+                    <div style="padding:10px; position:relative;">
+                        <div style="font-size:13px; font-weight:bold;">${i.title}</div>
+                        <span class="new-price">${i.newPrice} ريال</span>
+                        <button onclick="addReadyToCart('${i.newPrice}')" title="سلة الشراء" style="background:none;border:none;cursor:pointer;font-size:19px;color:#28a745;">🛒</button>
+                        <button onclick="addToFavorite('${i.id}')" title="المفضلة" style="background:none;border:none;cursor:pointer;font-size:19px;color:${favorites.includes(i.id)?'#d2346e':'#bbb'};">&#9829;</button>
+                        ${adminMode ? `<button onclick="deleteProduct('${i.id}','ready')" title="حذف" style="background:none;border:none;cursor:pointer;position:absolute;top:5px;left:5px;color:#ff4444;font-size:16px;">🗑️</button>` : ""}
+                    </div>
                 </div>
-            `).join('');
-        }
+            `).join('')
+            : '<p style="grid-column:1/-1; padding:20px;">لا توجد منتجات في هذا القسم</p>';
+}
 
-        // الدفع (واتساب)
-        function checkout() {
-            const phone = "966773463560";
-            let message = "طلب جديد من متجر اليرموك:%0a";
-            cart.forEach(item => message += `- ${item.name}: ${item.price} ر.س%0a`);
-            window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
-        }
+function calcGrandTotal() {
+    let t = readyCartTotal;
+    document.querySelectorAll('.item-price').forEach(i => t += parseInt(i.value || 0));
+    document.getElementById('final_total').innerText = t.toLocaleString();
+}
+
+function selectPayment(m, d, el) {
+    document.querySelectorAll('.pay-card-ui').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('account_display').style.display = 'block';
+    document.getElementById('account_number').innerText = d;
+    document.getElementById('selected_payment').value = m + " (" + d + ")";
+    document.getElementById('receipt_section').style.display = 'block';
+}
+
+// -- تأكيد الطلب (كما هو لديك) --
+function submitOrder() {
+    const name = document.getElementById('c_name').value;
+    const total = document.getElementById('final_total').innerText;
+    if (!name || total === "0") return alert("أكمل اسمك واختر ثوباً يليق بك أولاً");
+
+    const orderData = {
+        name: name,
+        phone: document.getElementById('c_phone').value,
+        total: total,
+        payment: document.getElementById('selected_payment').value,
+        date: new Date().toLocaleString('ar-YE'),
+        source: "متجر اليرموك الحديث 2026"
+    };
+
+    const webhookUrl = 'https://ali991278.app.n8n.cloud/webhook-test/e4bcc169-93c0-42c5-8226-528f3c6a72e3';
+    fetch(webhookUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderData)
+    })
+    .then(() => {
+        alert("اكتمل طلبك بنجاح.\n\nسنصنع أناقتك في اليرموك للخياطة بدقة تليق بك.");
+        location.reload();
+    })
+    .catch(() => alert("تم اعتماد طلبك.. شكراً لثقتك باليرموك"));
+}
     </script>
-</body>
-</html>
