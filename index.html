@@ -2,211 +2,54 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>اليرموك للخياطة - المتجر المتكامل 2026</title>
+    <title>محل اليرموك للخياطة والأقمشة الرجالية</title>
     <style>
-        /* ... نفس التنسيقات ... */
+        body { font-family: 'Arial', sans-serif; background-color: #f4f4f4; margin: 0; }
+        header { background: #2c3e50; color: white; padding: 20px; text-align: center; }
+        .container { width: 80%; margin: auto; padding: 20px; }
+        .product-grid { display: flex; gap: 20px; flex-wrap: wrap; }
+        .card { background: white; padding: 15px; border-radius: 8px; width: 250px; text-align: center; }
+        .card img { width: 100%; height: 200px; object-fit: cover; }
+        .measurement-table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
+        .measurement-table th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
+        .whatsapp-btn { position: fixed; bottom: 20px; left: 20px; background: #25d366; color: white; padding: 15px; border-radius: 50px; text-decoration: none; }
     </style>
-    <!-- إضافة مكتبات فايربيس أعلى الصفحة -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
-    <script>
-        // عدل firebaseConfig بالقيم من مشروعك في Firebase
-        const firebaseConfig = {
-          apiKey: "AIzaSyC94upmNINDoy1H68ctMOn-zPJmf2qcXlo",
-          authDomain: "yarmokstore-33cdb.firebaseapp.com",
-          projectId: "yarmokstore-33cdb",
-          storageBucket: "yarmokstore-33cdb.appspot.com",
-          messagingSenderId: "825824630041",
-          appId: "1:825824630041:web:235a2e70ad548b2eb22188",
-          measurementId: "G-8PQMJ4P9B1"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const storage = firebase.storage();
-    </script>
 </head>
 <body>
-<!-- ... باقي الصفحة كما هي ... -->
 
-<script>
-    let tempImg = ""; 
-    let receiptImg = "";
-    let readyCartTotal = 0;
+<header>
+    <h1>محل اليرموك للخياطة</h1>
+    <p>متخصصون في الأقمشة والثياب الرجالية الراقية</p>
+</header>
 
-    // دوال البوت ياقوت لم تتغير
-    function toggleYaqoot() { const chat = document.getElementById('yaqoot_chat'); chat.style.display = chat.style.display === 'block' ? 'none' : 'block'; }
-    function yaqootReply(type) {
-        const text = document.getElementById('chat_text');
-        if(type === 'policy') {
-            text.innerHTML = "<b>🛡️ ضمان اليرموك:</b> نضمن لك المقاس 100%. إذا وجد أي اختلاف، التعديل أو الاستبدال مجاني تماماً خلال 3 أيام. هيبتك لا تقبل الخطأ.";
-        } else if(type === 'offer') {
-            text.innerHTML = "<b>🎁 عرض الكاش:</b> عند دفع كامل المبلغ مقدماً، تحصل على (تطريز يدوي مجاني للرقبة) أو (علبة كبكات فاخرة) هدية من اليرموك.";
-        } else if(type === 'about') {
-            text.innerHTML = "<b>📜 قصة اليرموك:</b> بدأت رحلتنا في 2002 على يد الوالد المؤسس، تعلمنا أن الثوب ليس مجرد قطعة قماش، بل هو شخصية الرجل. نحن هنا لنحافظ على هذا الإرث.";
-        }
-    }
+<div class="container">
+    <h2>أحدث الأقمشة الرجالية</h2>
+    <div class="product-grid">
+        <div class="card">
+            <img src="images/fabrics/sample-fabric.jpg" alt="قماش سلك ياباني">
+            <h3>سلك ياباني فاخر</h3>
+            <p>السعر: 150 ريال</p>
+            <button>إضافة للسلة</button>
+        </div>
+    </div>
 
-    function openAdmin() { if(prompt("كلمة مرور الإدارة:") === "1234") document.getElementById('adminPanel').style.display='flex'; }
-    function closeAdmin() { document.getElementById('adminPanel').style.display='none'; }
+    <h2>جدول تفصيل الثياب (مقاساتك)</h2>
+    <table class="measurement-table">
+        <thead>
+            <tr>
+                <th>نوع المقاس</th>
+                <th>القيمة (سم)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>طول الثوب</td><td><input type="number" placeholder="0"></td></tr>
+            <tr><td>عرض الكتف</td><td><input type="number" placeholder="0"></td></tr>
+            <tr><td>طول الكم</td><td><input type="number" placeholder="0"></td></tr>
+        </tbody>
+    </table>
+</div>
 
-    // رفع الصورة المؤقتة
-    function encodeImg(i) { let r = new FileReader(); r.onload = (e) => tempImg = e.target.result; r.readAsDataURL(i.files[0]); }
-    function encodeReceipt(i) { let r = new FileReader(); r.onload = (e) => receiptImg = e.target.result; r.readAsDataURL(i.files[0]); }
+<a href="https://wa.me/966XXXXXXXXX" class="whatsapp-btn">تواصل عبر الواتساب</a>
 
-    function switchMainTab(t) {
-        document.querySelectorAll('.section, .tab-btn').forEach(el => el.classList.remove('active'));
-        document.getElementById('section_'+t).classList.add('active');
-        event.currentTarget.classList.add('active');
-    }
-
-    // دالة رفع المنتج والصورة إلى Firebase
-    async function saveProduct() {
-        const cat = document.getElementById('adm_cat').value;
-        const title = document.getElementById('adm_title').value;
-        const newP = document.getElementById('adm_new').value;
-        const fileInput = document.getElementById('adm_file');
-        const file = fileInput.files[0];
-
-        let imgURL = "";
-        if (file) {
-            const storageRef = storage.ref('products/' + file.name);
-            await storageRef.put(file);
-            imgURL = await storageRef.getDownloadURL();
-        } else {
-            imgURL = tempImg; // كود احتياطي لو تريد استخدام الصورة المؤقتة
-        }
-
-        if (cat === 'logo') {
-            document.getElementById('store_logo').src = imgURL;
-        } else {
-            await db.collection(cat === 'fabric' ? 'fabrics' : 'ready').add({
-                cat: cat,
-                title: title,
-                newPrice: newP,
-                img: imgURL
-            });
-        }
-
-        alert("تمت إضافة المنتج بنجاح");
-        filterReady('all');
-        closeAdmin();
-    }
-
-    // عرض قماش فايربيس في المودال
-    async function openFabricModal() {
-        const list = document.getElementById('modal_fabric_list');
-        const snapshot = await db.collection('fabrics').get();
-        const fabrics = snapshot.docs.map(doc => doc.data());
-        list.innerHTML = fabrics.length ? fabrics.map(f => `
-            <div style="border:1px solid #eee; padding:8px; text-align:center; cursor:pointer; border-radius:12px; transition:0.3s;" onclick="confirmFabricSelection('${f.title}', ${f.newPrice}, '${f.img}')">
-                <img src="${f.img}" style="width:100%; height:80px; object-fit:cover; border-radius:8px;">
-                <div style="font-size:11px; font-weight:bold; margin-top:5px;">${f.title}</div>
-                <div style="font-size:11px; color:green;">${f.newPrice} ريال</div>
-            </div>
-        `).join('') : '<p style="grid-column:1/-1; text-align:center;">لاتوجد أقمشة حالياً</p>';
-        document.getElementById('fabricModal').style.display = 'flex';
-    }
-
-    function confirmFabricSelection(name, price, img) {
-        const id = Date.now();
-        const card = document.createElement('div');
-        card.className = 'selected-thobe-card';
-        card.id = `thobe_${id}`;
-        card.innerHTML = `
-            <button type="button" class="remove-card" onclick="removeThobe(${id})">×</button>
-            <div style="display:flex; gap:12px; align-items:center;">
-                <img src="${img}" style="width:50px; height:50px; border-radius:8px; object-fit:cover; border:1px solid var(--gold);">
-                <div><b>ثوب: ${name}</b><br><span style="color:green; font-size:13px;">${price} ريال يمني</span></div>
-            </div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:15px;">
-                <select class="thobe-opt"><option>قلاب ملكي</option><option>قلاب فرنسي</option><option>صيني</option><option>سادة مربع</option></select>
-                <select class="thobe-opt"><option>كبك قماش</option><option>كبك حشو</option><option>سادة</option></select>
-                <select class="thobe-opt"><option>كبس ظاهر</option><option>زرار مخفي</option><option>سحاب VIP</option></select>
-                <select class="thobe-opt"><option>قصة قطري</option><option>قصة سعودي</option><option>قصة كويتي</option></select>
-            </div>
-            <input type="hidden" class="item-price" value="${price}">
-        `;
-        document.getElementById('tailor_list').appendChild(card);
-        calcGrandTotal();
-        document.getElementById('fabricModal').style.display = 'none';
-    }
-
-    // دالة عرض المنتجات الجاهزة من فايربيس
-    async function filterReady(type, btn) {
-        if(btn) {
-            document.querySelectorAll('.ready-type-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-        }
-        const display = document.getElementById('ready_display');
-        const snapshot = await db.collection('ready').get();
-        let items = snapshot.docs.map(doc => doc.data());
-        if (type !== 'all') items = items.filter(i => i.cat === type);
-
-        display.innerHTML = items.length ? items.map(i => `
-            <div class="product-card">
-                <img src="${i.img}">
-                <div style="padding:10px;">
-                    <div style="font-size:13px; font-weight:bold;">${i.title}</div>
-                    <span class="new-price">${i.newPrice} ريال</span>
-                    <button onclick="addReadyToCart(${i.newPrice})" style="width:100%; margin-top:8px; background:var(--gold); border:none; color:white; border-radius:8px; font-size:12px; padding:8px; cursor:pointer; font-weight:bold;">إضافة للطلب</button>
-                </div>
-            </div>
-        `).join('') : '<p style="grid-column:1/-1; padding:20px;">لا توجد منتجات في هذا القسم</p>';
-    }
-
-    function addReadyToCart(p) { readyCartTotal += parseInt(p); calcGrandTotal(); alert("تمت إضافة المنتج إلى قائمة هيبتك"); }
-    function removeThobe(id) { document.getElementById(`thobe_${id}`).remove(); calcGrandTotal(); }
-
-    function calcGrandTotal() {
-        let t = readyCartTotal;
-        document.querySelectorAll('.item-price').forEach(i => t += parseInt(i.value || 0));
-        document.getElementById('final_total').innerText = t.toLocaleString();
-    }
-
-    function selectPayment(m, d, el) {
-        document.querySelectorAll('.pay-card-ui').forEach(c => c.classList.remove('active'));
-        el.classList.add('active');
-        document.getElementById('account_display').style.display = 'block';
-        document.getElementById('account_number').innerText = d;
-        document.getElementById('selected_payment').value = m + " (" + d + ")";
-        document.getElementById('receipt_section').style.display = 'block';
-    }
-
-    function submitOrder() {
-        const name = document.getElementById('c_name').value;
-        const total = document.getElementById('final_total').innerText;
-        if (!name || total === "0") return alert("أكمل اسمك واختر ثوباً يليق بك أولاً");
-
-        const orderData = {
-            name: name,
-            phone: document.getElementById('c_phone').value,
-            total: total,
-            payment: document.getElementById('selected_payment').value,
-            date: new Date().toLocaleString('ar-YE'),
-            source: "متجر اليرموك الحديث 2026"
-        };
-
-        const webhookUrl = 'https://ali991278.app.n8n.cloud/webhook-test/e4bcc169-93c0-42c5-8226-528f3c6a72e3';
-        
-        fetch(webhookUrl, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(orderData)
-        })
-        .then(() => {
-            alert("اكتمل طلبك بنجاح.\n\nسنصنع أناقتك في اليرموك للخياطة بدقة تليق بك.");
-            location.reload();
-        })
-        .catch(() => alert("تم اعتماد طلبك.. شكراً لثقتك باليرموك"));
-    }
-
-    // عند أول تحميل للصفحة، عرض المنتجات تلقائياً جاهزة من فايربيس
-    document.addEventListener('DOMContentLoaded', () => {
-        filterReady('all');
-    });
-</script>
 </body>
 </html>
