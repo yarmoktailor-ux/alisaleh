@@ -263,24 +263,41 @@
     	document.getElementById('fabricModal').style.display = 'none';
 	}
 
-	function filterReady(type, btn) {
+	    function filterReady(type, btn) {
+        if(btn) {
+            document.querySelectorAll('.ready-type-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+        const display = document.getElementById('ready_display');
+        const items = type === 'all' ? db.ready : db.ready.filter(i => i.cat === type);
+        
+        display.innerHTML = items.length ? items.map(i => `
+            <div class="product-card-v2" style="grid-column: 1 / -1; background: white; text-align: right; padding-bottom: 20px;">
+                <img src="${i.img}" style="width: 100%; height: auto; display: block;">
+                <div style="padding: 20px;">
+                    <h1 style="font-size: 32px; margin: 0; color: #333;">${i.title}</h1>
+                    <div style="font-size: 18px; color: #666; margin: 10px 0;">${i.newPrice.toLocaleString()} YER</div>
+                    
+                    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+                    
+                    <div style="display: flex; align-items: center; border: 1px solid #ddd; border-radius: 8px; width: fit-content; margin-bottom: 15px;">
+                        <button onclick="this.parentNode.querySelector('input').stepUp()" style="padding: 10px 15px; border: none; background: none; cursor: pointer; font-size: 18px;">+</button>
+                        <input type="number" value="1" min="1" style="width: 40px; text-align: center; border: none; font-size: 16px; outline: none;" readonly>
+                        <button onclick="this.parentNode.querySelector('input').stepDown()" style="padding: 10px 15px; border: none; background: none; cursor: pointer; font-size: 18px;">−</button>
+                    </div>
 
-
-    	if(btn) {
-        	document.querySelectorAll('.ready-type-btn').forEach(b => b.classList.remove('active'));
-        	btn.classList.add('active');
-    	}
-    	const display = document.getElementById('ready_display');
-    	const items = type === 'all' ? db.ready : db.ready.filter(i => i.cat === type);
-    	display.innerHTML = items.length ? items.map(i => `
-        	<div class="product-card">
-            	<img src="${i.img}">
-            	<div style="padding:5px; font-size:13px; font-weight:bold;">${i.title}</div>
-            	<div><span class="new-price">${i.newPrice} ريال</span></div>
-            	<button onclick="addReadyToCart(${i.newPrice})" style="width:90%; margin-top:5px; background:var(--gold); border:none; color:white; border-radius:5px; font-size:11px; padding:5px; cursor:pointer;">إضافة للطلب</button>
-        	</div>
-    	`).join('') : '<p style="grid-column:1/-1;">لا توجد منتجات حالياً</p>';
-	}
+                    <button onclick="addReadyToCart(${i.newPrice})" style="width: 100%; padding: 15px; background: white; border: 2px solid black; color: black; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                        <span style="font-size: 20px;">🛒</span> Add to cart
+                    </button>
+                    
+                    <button onclick="addReadyToCart(${i.newPrice})" style="width: 100%; padding: 15px; background: black; border: none; color: white; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer;">
+                        Buy it now
+                    </button>
+                </div>
+            </div>
+        `).join('') : '<p style="grid-column:1/-1; padding:20px; text-align:center;">لا توجد منتجات حالياً</p>';
+		}
+	
 
 	function addReadyToCart(p) { readyCartTotal += parseInt(p); calcGrandTotal(); alert("تمت إضافة المنتج الجاهز"); }
 	function removeThobe(id) { document.getElementById(`thobe_${id}`).remove(); calcGrandTotal(); }
