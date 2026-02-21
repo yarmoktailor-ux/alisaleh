@@ -9,10 +9,9 @@
 <body>
 
 <div class="welcome-banner">أهلاً بك في اليرموك.. "إرث الوالد يرحب بك" ✨</div>
-
 <div class="heritage-box">
     <strong>اليرموك.. خيطٌ من الماضي، ونسيجٌ للمستقبل</strong><br>
-    منذ 2002، نصنع هيبتك بدقة القياس وخبرة السنين.
+    منذ 2002، نصنع هيبتك بدقة القياس وخبرة السنين. نحن لا نخيط أثواباً، نحن نصنع حضورك.
 </div>
 
 <button class="settings-btn" onclick="openAdmin()">⚙️</button>
@@ -35,7 +34,7 @@
 <div class="main-container" id="app_body">
     <div class="header">
         <img src="https://i.ibb.co/C3YFp0k7/688339f4-1296-48c0-bc66-3be039832675.png" class="logo" id="store_logo" alt="اليرموك">
-        <h2>اليرموك الحديث</h2>
+        <h2 style="margin:0; color:var(--brown); letter-spacing:1px;">اليرموك الحديث</h2>
     </div>
 
     <div class="cust-info">
@@ -49,42 +48,57 @@
     </div>
 
     <div id="section_tailor" class="section active">
-        <h4>📏 مقاساتك المحفوظة (بالهنش)</h4>
-        <div class="measure-grid" id="measure_inputs">
-            </div>
-        <button type="button" class="btn-add-fabric" onclick="openFabricModal()">+ اختر القماش وابدأ التفصيل</button>
-        <div id="tailor_list"></div>
+        <h4 style="margin:0 0 10px 0; color:var(--brown); display:flex; align-items:center; gap:5px;">📏 مقاساتك المحفوظة (بالهنش)</h4>
+        <div class="measure-grid">
+            <div><label>الطول</label><input type="number" step="0.1" class="m-input"></div>
+            <div><label>الكتف</label><input type="number" step="0.1" class="m-input"></div>
+            <div><label>اليد</label><input type="number" step="0.1" class="m-input"></div>
+            <div><label>الصدر</label><input type="number" step="0.1" class="m-input"></div>
+            <div><label>الرقبة</label><input type="number" step="0.1" class="m-input"></div>
+            <div><label>وسط يد</label><input type="number" step="0.1" class="m-input"></div>
+            <div><label>الكبك</label><input type="number" step="0.1" class="m-input"></div>
+            <div><label>الخطوة</label><input type="number" step="0.1" class="m-input"></div>
+        </div>
+        <button type="button" class="btn-main-action" onclick="openFabricModal()">+ اختر القماش وابدأ التفصيل</button>
+        <div id="tailor_list" style="margin-top:20px;"></div>
     </div>
 
     <div id="section_ready" class="section">
-        <div class="ready-nav-container">
-            <div class="ready-nav">
-                <button class="ready-type-btn active" onclick="filterReady('all', this)">الكل</button>
-                <button class="ready-type-btn" onclick="filterReady('thobe_r', this)">👕 ثياب</button>
-            </div>
-            <div class="grid-controls">
-                <button onclick="changeGrid(1)">⬛</button>
-                <button onclick="changeGrid(2)">⬜⬜</button>
-            </div>
+        <div class="ready-nav">
+            <button class="ready-type-btn active" onclick="filterReady('all', this)">الكل</button>
+            <button class="ready-type-btn" onclick="filterReady('thobe_r', this)">👕 ثياب جاهزة</button>
+            <button class="ready-type-btn" onclick="filterReady('coat_r', this)">🧥 أكوات</button>
+            <button class="ready-type-btn" onclick="filterReady('shawl_r', this)">🧣 شيلان</button>
         </div>
-        <div id="ready_display" class="items-grid"></div>
+        <div id="ready_display" class="items-grid">
+            <p style="text-align:center; grid-column:1/-1; color:#999; padding:20px;">لا توجد منتجات جاهزة حالياً</p>
+        </div>
     </div>
 
-    <div class="guarantee-box">🛡️ ضمان اليرموك الذهبي: نضمن لك دقة المقاس بالملي.</div>
+    <div class="guarantee-box">
+        🛡️ <strong>ضمان اليرموك الذهبي:</strong> نضمن لك دقة المقاس بالملي. رضاك هو خيطنا الأول.
+    </div>
 
-    <div class="payment-section">
-        <h4>💳 اختر طريقة الدفع:</h4>
-        <div class="pay-cards">
-            <div class="pay-card-ui" onclick="selectPayment('الكريمي', 'حساب ريال يمني: 3005374854', this)">بنك الكريمي</div>
-            <div class="pay-card-ui" onclick="selectPayment('محفظة جيب', 'رقم النقطة: 595720', this)">محفظة جيب</div>
+    <div class="payment-area">
+        <h4 style="margin:0 0 10px 0; color:var(--brown); font-size:14px;">💳 اختر طريقة الدفع:</h4>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div class="pay-card-ui" onclick="selectPayment('الكريمي', 'حساب ريال يمني: 3005374854', this)">
+                <div class="pay-inner" style="color:#1a5eb8;">بنك الكريمي</div>
+            </div>
+            <div class="pay-card-ui" onclick="selectPayment('محفظة جيب', 'رقم النقطة: 595720', this)">
+                <div class="pay-inner" style="color:#f39c12;">محفظة جيب</div>
+            </div>
         </div>
-        <div id="account_display" class="account-info">
+        
+        <div id="account_display" style="display:none;" class="acc-box">
             <div id="account_number"></div>
         </div>
-        <div id="receipt_section" style="display:none;">
+
+        <div id="receipt_section" style="display:none;" class="receipt-box">
             <label>📸 إرفاق صورة إيصال التحويل:</label>
             <input type="file" id="receipt_file" accept="image/*" onchange="encodeReceipt(this)">
         </div>
+        <input type="hidden" id="selected_payment" value="لم يتم التحديد">
     </div>
 
     <div class="footer-total">
@@ -94,8 +108,25 @@
     </div>
 </div>
 
-<div id="adminPanel" class="modal-overlay"> </div>
-<div id="fabricModal" class="modal-overlay"> </div>
+<div id="adminPanel" class="modal-full">
+    <div class="modal-content admin-bg">
+        <h3>إدارة متجر اليرموك</h3>
+        <select id="adm_cat"><option value="fabric">قماش تفصيل</option><option value="thobe_r">ثوب جاهز</option><option value="coat_r">كوت جاهز</option><option value="shawl_r">شال جاهز</option><option value="logo">تغيير الشعار</option></select>
+        <input type="file" id="adm_file" onchange="encodeImg(this)">
+        <input type="text" id="adm_title" placeholder="اسم المنتج">
+        <input type="number" id="adm_new" placeholder="السعر">
+        <button onclick="saveProduct()" class="btn-save">نشر المنتج الآن</button>
+        <button onclick="closeAdmin()" class="btn-cancel">إلغاء</button>
+    </div>
+</div>
+
+<div id="fabricModal" class="modal-full">
+    <div class="modal-content white-bg">
+        <h3 style="color:var(--brown);">أقمشة اليرموك الفاخرة</h3>
+        <div id="modal_fabric_list" class="fabric-grid"></div>
+        <button onclick="document.getElementById('fabricModal').style.display='none'" class="btn-cancel">إغلاق</button>
+    </div>
+</div>
 
 <script src="db.js"></script>
 <script src="script.js"></script>
