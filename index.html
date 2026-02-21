@@ -130,5 +130,27 @@
 
 <script src="db.js"></script>
 <script src="script.js"></script>
+<div id="adminPanel" class="modal-full">
+    <div class="modal-content admin-bg" style="max-width: 500px;">
+        <h3>إضافة منتج بتفاصيل "العماري"</h3>
+        <select id="adm_cat" class="thobe-opt">
+            <option value="fabric">قماش (بالمتر/الطاقة)</option>
+            <option value="thobe_r">ثوب جاهز</option>
+        </select>
+        
+        <input type="text" id="adm_title" placeholder="اسم القماش (مثلاً: سميراميس)" class="thobe-opt">
+        <input type="number" id="adm_new" placeholder="السعر (YER)" class="thobe-opt">
+        
+        <textarea id="adm_desc" placeholder="وصف القماش ومميزاته" class="thobe-opt"></textarea>
+        <input type="text" id="adm_comp" placeholder="تركيبة القماش (مثلاً: تترون 100%)" class="thobe-opt">
+        <input type="text" id="adm_origin" placeholder="بلد الصنع" class="thobe-opt">
+        
+        <input type="file" id="adm_file" onchange="encodeImg(this)" class="thobe-opt">
+        
+        <button onclick="saveProductV2()" class="btn-send" style="background:var(--gold);">نشر في المتجر</button>
+        <button onclick="closeAdmin()" class="btn-cancel">إغلاق</button>
+    </div>
+</div>
+
 </body>
 </html>
