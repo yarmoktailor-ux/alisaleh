@@ -88,38 +88,51 @@ function filterReady(type, btn) {
         document.querySelectorAll('.ready-type-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
     }
-    
     const display = document.getElementById('ready_display');
     const items = type === 'all' ? db.ready : db.ready.filter(i => i.cat === type);
     
-    // ضبط شكل الشبكة بناءً على الاختيار
-    display.style.display = "grid";
-    display.style.gridTemplateColumns = currentGridCols === 1 ? "1fr" : "1fr 1fr";
-    display.style.gap = currentGridCols === 1 ? "20px" : "10px";
-
     display.innerHTML = items.length ? items.map(i => `
-        <div class="product-card-v2" style="background: white; text-align: right; border: 1px solid #eee; border-radius:15px; overflow:hidden; padding-bottom: ${currentGridCols === 1 ? '20px' : '10px'};">
-            <img src="${i.img}" style="width: 100%; height: ${currentGridCols === 1 ? 'auto' : '150px'}; object-fit: cover; display: block;">
-            <div style="padding: ${currentGridCols === 1 ? '20px' : '10px'};">
-                <h1 style="font-size: ${currentGridCols === 1 ? '28px' : '16px'}; margin: 0; color: #333;">${i.title}</h1>
-                <div style="font-size: ${currentGridCols === 1 ? '18px' : '14px'}; color: #666; margin: 5px 0;">${i.newPrice.toLocaleString()} YER</div>
+        <div class="product-card-v2" style="grid-column: 1 / -1; background: white; text-align: right; padding-bottom: 20px; border-bottom: 5px solid #f9f9f9;">
+            <img src="${i.img}" style="width: 100%; height: auto; display: block;">
+            <div style="padding: 20px;">
+                <h1 style="font-size: 28px; margin: 0; color: #333;">${i.title}</h1>
+                <div style="font-size: 20px; color: var(--gold); font-weight: bold; margin: 10px 0;">${i.newPrice.toLocaleString()} YER</div>
                 
-                ${currentGridCols === 1 ? `
-                    <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
-                    <div style="display: flex; align-items: center; border: 1px solid #ddd; border-radius: 8px; width: fit-content; margin-bottom: 15px;">
-                        <button onclick="this.parentNode.querySelector('input').stepUp()" style="padding: 8px 12px; border: none; background: none; cursor: pointer;">+</button>
-                        <input type="number" value="1" min="1" style="width: 35px; text-align: center; border: none; outline: none;" readonly>
-                        <button onclick="this.parentNode.querySelector('input').stepDown()" style="padding: 8px 12px; border: none; background: none; cursor: pointer;">−</button>
+                <div style="margin: 15px 0;">
+                    <label style="display:block; font-weight:bold; margin-bottom:10px;">اختر النوع:</label>
+                    <div style="display:flex; gap:10px;">
+                        <button class="type-sel active" onclick="selectType(this)">بالتوفير (متر)</button>
+                        <button class="type-sel" onclick="selectType(this)">طاقة كاملة</button>
                     </div>
-                    <button onclick="addReadyToCart(${i.newPrice})" style="width: 100%; padding: 12px; background: white; border: 2px solid black; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 10px;">🛒 Add to cart</button>
-                    <button onclick="addReadyToCart(${i.newPrice})" style="width: 100%; padding: 12px; background: black; border: none; color: white; border-radius: 8px; font-weight: bold; cursor: pointer;">Buy it now</button>
-                ` : `
-                    <button onclick="addReadyToCart(${i.newPrice})" style="width: 100%; padding: 8px; background: black; color: white; border: none; border-radius: 5px; font-size: 12px; cursor: pointer; margin-top: 5px;">شراء سريع</button>
-                `}
+                </div>
+
+                <div style="background: #fdfbf7; padding: 15px; border-radius: 10px; margin: 20px 0; font-size: 14px;">
+                    <p><strong>📍 بلد الصنع:</strong> ${i.origin || 'اليابان'}</p>
+                    <p><strong>🧵 التركيبة:</strong> ${i.composition || 'بوليستر'}</p>
+                    <p><strong>📏 العرض:</strong> 58 إنش (عرضين)</p>
+                </div>
+
+                <div style="display: flex; align-items: center; border: 1px solid #ddd; border-radius: 8px; width: fit-content; margin-bottom: 20px;">
+                    <button onclick="changeQty(this, 1)" style="padding: 10px 20px; border: none; background: none; font-size: 20px;">+</button>
+                    <input type="number" value="1" min="1" style="width: 50px; text-align: center; border: none; font-size: 18px; outline: none;" readonly>
+                    <button onclick="changeQty(this, -1)" style="padding: 10px 20px; border: none; background: none; font-size: 20px;">−</button>
+                </div>
+
+                <button onclick="addToCartV2('${i.title}', ${i.newPrice})" style="width: 100%; padding: 18px; background: black; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 18px; cursor: pointer;">
+                    إضافة للسلة 🛒
+                </button>
             </div>
         </div>
-    `).join('') : '<p style="grid-column:1/-1; padding:20px; text-align:center;">لا توجد منتجات حالياً</p>';
+    `).join('') : '<p style="text-align:center; padding:20px;">لا يوجد منتجات</p>';
 }
+
+// دالة لتغيير الكمية
+function changeQty(btn, val) {
+    let input = btn.parentNode.querySelector('input');
+    let newVal = parseInt(input.value) + val;
+    if (newVal >= 1) input.value = newVal;
+}
+
 
 function addReadyToCart(p) { readyCartTotal += parseInt(p); calcGrandTotal(); alert("تمت الإضافة"); }
 function removeThobe(id) { document.getElementById(`thobe_${id}`).remove(); calcGrandTotal(); }
