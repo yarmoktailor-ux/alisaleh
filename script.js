@@ -71,23 +71,54 @@ function confirmFabricSelection(name, price, img) {
     document.getElementById('fabricModal').style.display = 'none';
 }
 
+
+// متغير للتحكم في عدد الأعمدة (الافتراضي 1 أي صورة كبيرة)
+let currentGridCols = 1; 
+
+function changeGrid(cols) {
+    currentGridCols = cols;
+    // إعادة تشغيل الفلتر لتحديث العرض بالشكل الجديد
+    const activeBtn = document.querySelector('.ready-type-btn.active');
+    const currentType = activeBtn ? activeBtn.getAttribute('onclick').match(/'([^']+)'/)[1] : 'all';
+    filterReady(currentType);
+}
+
 function filterReady(type, btn) {
     if(btn) {
         document.querySelectorAll('.ready-type-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
     }
+    
     const display = document.getElementById('ready_display');
     const items = type === 'all' ? db.ready : db.ready.filter(i => i.cat === type);
+    
+    // ضبط شكل الشبكة بناءً على الاختيار
+    display.style.display = "grid";
+    display.style.gridTemplateColumns = currentGridCols === 1 ? "1fr" : "1fr 1fr";
+    display.style.gap = currentGridCols === 1 ? "20px" : "10px";
+
     display.innerHTML = items.length ? items.map(i => `
-        <div class="product-card">
-            <img src="${i.img}">
-            <div style="padding:10px;">
-                <div style="font-size:13px; font-weight:bold;">${i.title}</div>
-                <span class="new-price">${i.newPrice} ريال</span>
-                <button onclick="addReadyToCart(${i.newPrice})" style="width:100%; background:var(--gold); border:none; color:white; padding:8px; border-radius:8px; cursor:pointer;">إضافة للطلب</button>
+        <div class="product-card-v2" style="background: white; text-align: right; border: 1px solid #eee; border-radius:15px; overflow:hidden; padding-bottom: ${currentGridCols === 1 ? '20px' : '10px'};">
+            <img src="${i.img}" style="width: 100%; height: ${currentGridCols === 1 ? 'auto' : '150px'}; object-fit: cover; display: block;">
+            <div style="padding: ${currentGridCols === 1 ? '20px' : '10px'};">
+                <h1 style="font-size: ${currentGridCols === 1 ? '28px' : '16px'}; margin: 0; color: #333;">${i.title}</h1>
+                <div style="font-size: ${currentGridCols === 1 ? '18px' : '14px'}; color: #666; margin: 5px 0;">${i.newPrice.toLocaleString()} YER</div>
+                
+                ${currentGridCols === 1 ? `
+                    <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+                    <div style="display: flex; align-items: center; border: 1px solid #ddd; border-radius: 8px; width: fit-content; margin-bottom: 15px;">
+                        <button onclick="this.parentNode.querySelector('input').stepUp()" style="padding: 8px 12px; border: none; background: none; cursor: pointer;">+</button>
+                        <input type="number" value="1" min="1" style="width: 35px; text-align: center; border: none; outline: none;" readonly>
+                        <button onclick="this.parentNode.querySelector('input').stepDown()" style="padding: 8px 12px; border: none; background: none; cursor: pointer;">−</button>
+                    </div>
+                    <button onclick="addReadyToCart(${i.newPrice})" style="width: 100%; padding: 12px; background: white; border: 2px solid black; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 10px;">🛒 Add to cart</button>
+                    <button onclick="addReadyToCart(${i.newPrice})" style="width: 100%; padding: 12px; background: black; border: none; color: white; border-radius: 8px; font-weight: bold; cursor: pointer;">Buy it now</button>
+                ` : `
+                    <button onclick="addReadyToCart(${i.newPrice})" style="width: 100%; padding: 8px; background: black; color: white; border: none; border-radius: 5px; font-size: 12px; cursor: pointer; margin-top: 5px;">شراء سريع</button>
+                `}
             </div>
         </div>
-    `).join('') : 'لا توجد منتجات';
+    `).join('') : '<p style="grid-column:1/-1; padding:20px; text-align:center;">لا توجد منتجات حالياً</p>';
 }
 
 function addReadyToCart(p) { readyCartTotal += parseInt(p); calcGrandTotal(); alert("تمت الإضافة"); }
