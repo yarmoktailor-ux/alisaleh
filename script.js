@@ -154,23 +154,53 @@ function selectPayment(m, d, el) {
 
 function submitOrder() {
     const name = document.getElementById('c_name').value;
+    const phone = document.getElementById('c_phone').value;
     const total = document.getElementById('final_total').innerText;
-    if (!name || total === "0") return alert("أكمل البيانات أولاً");
+    const payment = document.getElementById('selected_payment').value;
 
-    const orderData = {
-        name: name,
-        phone: document.getElementById('c_phone').value,
-        total: total,
-        payment: document.getElementById('selected_payment').value,
-        date: new Date().toLocaleString('ar-YE')
-    };
+    if (!name || !phone) {
+        return alert("يرجى إدخال الاسم ورقم الهاتف لإتمام الطلب.");
+    }
 
-    fetch('https://ali991278.app.n8n.cloud/webhook-test/e4bcc169-93c0-42c5-8226-528f3c6a72e3', {
-        method: 'POST',
-        mode: 'no-cors',
-        body: JSON.stringify(orderData)
-    }).then(() => {
-        alert("اكتمل طلبك بنجاح في اليرموك");
-        location.reload();
+    // 1. تجميع المقاسات
+    let measurements = "";
+    const labels = ["الطول", "الكتف", "اليد", "الصدر", "الرقبة", "وسط يد", "الكبك", "الخطوة"];
+    const inputs = document.querySelectorAll('.m-input');
+    labels.forEach((label, index) => {
+        if (inputs[index].value) {
+            measurements += `${label}: ${inputs[index].value} انش\n`;
+        }
     });
+
+    // 2. تجميع الثياب المختارة (الأقمشة والموديلات)
+    let thobesDetails = "";
+    const thobeCards = document.querySelectorAll('.selected-thobe-card');
+    thobeCards.forEach((card, index) => {
+        const title = card.querySelector('b').innerText;
+        const selects = card.querySelectorAll('select');
+        thobesDetails += `\n--- ثوب تفصيل (${index + 1}) ---\n`;
+        thobesDetails += `${title}\n`;
+        thobesDetails += `الموديل: ${selects[0].value}\n`;
+        thobesDetails += `الكم: ${selects[1].value}\n`;
+        thobesDetails += `الخياطة: ${selects[2].value}\n`;
+        thobesDetails += `التصميم: ${selects[3].value}\n`;
+    });
+
+    // 3. تجهيز رسالة الواتساب
+    let message = `*طلب جديد من متجر اليرموك 🌙*\n\n`;
+    message += `👤 *العميل:* ${name}\n`;
+    message += `📞 *الهاتف:* ${phone}\n`;
+    message += `\n📏 *المقاسات:*\n${measurements || "لم يتم إدخال مقاسات"}\n`;
+    message += thobesDetails;
+    message += `\n💰 *الإجمالي:* ${total} ريال`;
+    message += `\n💳 *طريقة الدفع:* ${payment}`;
+
+    // 4. إرسال إلى الواتساب
+    const whatsappNumber = "967773463560"; // رقمك مع رمز الدولة
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+
+    // فتح الرابط
+    window.open(whatsappUrl, '_blank');
 }
+
